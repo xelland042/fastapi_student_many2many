@@ -4,35 +4,38 @@ from typing import List
 from schema import StudentSchema, SubjectSchema, CreateStudent, CreateSubject
 
 from models import get_db, Student, Subject, StudentSubject, Base, engine
+import users
 
 app = FastAPI(
     title='Student Subject API',
     docs_url='/',
 )
 
+app.include_router(users.router)
+
 Base.metadata.create_all(engine)
 
 
 @app.get('/students/', response_model=List[StudentSchema], tags=['Students and Subjects List'])
-async def list_student(db: Session = Depends(get_db)):
+async def list_students(db: Session = Depends(get_db)):
     students = db.query(Student).options(joinedload(Student.subjects)).all()
     return students
 
 
 @app.get('/subjects/', response_model=List[SubjectSchema], tags=['Students and Subjects List'])
-async def list_subject(db: Session = Depends(get_db)):
+async def list_subjects(db: Session = Depends(get_db)):
     subjects = db.query(Subject).options(joinedload(Subject.students)).all()
     return subjects
 
 
 @app.get('/students/{student_id}/', response_model=StudentSchema, tags=['Students and Subjects Details'])
-async def list_student(student_id: int, db: Session = Depends(get_db)):
+async def student_detail(student_id: int, db: Session = Depends(get_db)):
     student = db.query(Student).options(joinedload(Student.subjects)).where(Student.id == student_id).one()
     return student
 
 
 @app.get('/subjects/{subject_id}/', response_model=StudentSchema, tags=['Students and Subjects Details'])
-async def list_subject(subject_id: int, db: Session = Depends(get_db)):
+async def subject_detail(subject_id: int, db: Session = Depends(get_db)):
     subject = db.query(Subject).options(joinedload(Subject.students)).where(Subject.id == subject_id).one()
     return subject
 
@@ -65,7 +68,7 @@ async def crete_subject(subject: CreateSubject, db: Session = Depends(get_db)):
 
 
 @app.patch('/students/{student_id}/', response_model=StudentSchema, tags=['Students and Subjects Update'])
-async def list_student(updated_student: CreateStudent, student_id: int, db: Session = Depends(get_db)):
+async def update_student(updated_student: CreateStudent, student_id: int, db: Session = Depends(get_db)):
     student = db.query(Student).get(student_id)
     new_subjects = []
     if student:
@@ -83,7 +86,7 @@ async def list_student(updated_student: CreateStudent, student_id: int, db: Sess
 
 
 @app.patch('/subjects/{subject_id}/', response_model=StudentSchema, tags=['Students and Subjects Update'])
-async def list_subject(updated_subject: CreateSubject, subject_id: int, db: Session = Depends(get_db)):
+async def update_subject(updated_subject: CreateSubject, subject_id: int, db: Session = Depends(get_db)):
     subject = db.query(Subject).get(subject_id)
     new_students = []
     if subject:
@@ -99,7 +102,7 @@ async def list_subject(updated_subject: CreateSubject, subject_id: int, db: Sess
 
 
 @app.delete('/students/{student_id}/', response_model=StudentSchema, tags=['Students and Subjects Delete'])
-async def list_student(student_id: int, db: Session = Depends(get_db)):
+async def delete_student(student_id: int, db: Session = Depends(get_db)):
     student = db.query(Student).get(student_id)
     if student:
         db.delete(student)
@@ -109,7 +112,7 @@ async def list_student(student_id: int, db: Session = Depends(get_db)):
 
 
 @app.delete('/subjects/{subject_id}/', response_model=StudentSchema, tags=['Students and Subjects Delete'])
-async def list_subject(subject_id: int, db: Session = Depends(get_db)):
+async def delete_subject(subject_id: int, db: Session = Depends(get_db)):
     subject = db.query(Subject).get(subject_id)
     if subject:
         db.delete(subject)
