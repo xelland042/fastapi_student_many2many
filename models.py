@@ -59,3 +59,16 @@ class StudentSubject(Base):
 
     def __repr__(self):
         return f'{self.student} - {self.subject}'
+
+
+class User(BaseModel):
+    __tablename__ = 'user'
+
+    username = Column(String, unique=True)
+    first_name = Column(String, default=None, nullable=True)
+    last_name = Column(String, default=None, nullable=True)
+    email = Column(String, unique=True)
+    hashed_password = Column(String, default=None, nullable=True)
+
+    def __repr__(self):
+        return f'{self.id} - {self.username}'
